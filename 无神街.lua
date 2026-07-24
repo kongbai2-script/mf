@@ -37,3 +37,4 @@ humanoidRootPart.CFrame=originalCFrame
 Camera.CFrame=originalCameraCFrame
 end
 wushenjieSCRIPT()
+print("ok")
