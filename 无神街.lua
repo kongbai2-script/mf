@@ -1,3 +1,4 @@
+print("ok")
 local Players=game:GetService("Players")
 local Workspace=game:GetService("Workspace")
 local LocalPlayer=Players.LocalPlayer
@@ -37,4 +38,3 @@ humanoidRootPart.CFrame=originalCFrame
 Camera.CFrame=originalCameraCFrame
 end
 wushenjieSCRIPT()
-print("ok")
