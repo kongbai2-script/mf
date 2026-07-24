@@ -2,7 +2,7 @@ local Players=game:GetService("Players")
 local Workspace=game:GetService("Workspace")
 local LocalPlayer=Players.LocalPlayer
 local Camera=workspace.CurrentCamera
-local function CollectAllTreasures()
+local function wushenjieSCRIPT()
 local character=LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoidRootPart=character:FindFirstChild("HumanoidRootPart")
 if not humanoidRootPart then return end
@@ -36,4 +36,4 @@ end
 humanoidRootPart.CFrame=originalCFrame
 Camera.CFrame=originalCameraCFrame
 end
-CollectAllTreasures()
+wushenjieSCRIPT()
