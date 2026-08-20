@@ -1,0 +1,67 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+local portalModels = {}
+for _, child in ipairs(workspace:GetChildren()) do
+    if child:IsA("Model") and string.find(child.Name:lower(), "portal") then
+        table.insert(portalModels, child)
+    end
+end
+
+if #portalModels > 0 then
+    local Event = game:GetService("ReplicatedStorage").VerdantRemotes["VDT_Portal.CreateSetup"]
+    for _, portal in ipairs(portalModels) do
+        local timeLabel = portal:FindFirstChild("Billboard") and portal.Billboard:FindFirstChild("Container") and portal.Billboard.Container:FindFirstChild("Time") and portal.Billboard.Container.Time:FindFirstChild("TimeLabel")
+        if timeLabel and timeLabel:IsA("TextLabel") and timeLabel.Text == "Waiting..." then
+            local touchPart = portal:FindFirstChild("Touch")
+            if touchPart and touchPart:IsA("BasePart") then
+                pcall(function()
+                    firetouchinterest(hrp, touchPart, 0)
+                    task.wait(0.02)
+                    firetouchinterest(hrp, touchPart, 1)
+                end)
+                Event:FireServer({ Difficulty = "Easy", MaxPlayers = 1 })
+                task.wait(0.3)
+            end
+        end
+    end
+else
+    if getgc then
+        local pattern = "%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x"
+        for _, obj in ipairs(getgc(true)) do
+            if type(obj) == "string" and string.match(obj, pattern) then
+                pcall(function()
+                    game:GetService("ReplicatedStorage").VerdantRemotes.VDT_CutsceneVoteSkip:FireServer(obj)
+                end)
+                break
+            end
+            if type(obj) == "table" then
+                pcall(function()
+                    for _, v in pairs(obj) do
+                        if type(v) == "string" and string.match(v, pattern) then
+                            game:GetService("ReplicatedStorage").VerdantRemotes.VDT_CutsceneVoteSkip:FireServer(v)
+                            return
+                        end
+                    end
+                end)
+            end
+        end
+    end
+    local EventChest = game:GetService("ReplicatedStorage").VerdantRemotes["VDT_Chest.Open"]
+    for _, chest in ipairs(workspace:GetDescendants()) do
+        if string.find(chest.Name, "Chest", 1, true) and chest:IsA("Model") then
+            local part = chest:FindFirstChild("Part")
+            if part and part:IsA("BasePart") then
+                local startTime = tick()
+                while tick() - startTime < 0.5 do
+                    hrp.CFrame = CFrame.new(part.Position + Vector3.new(0, 2, 0))
+                    pcall(function() EventChest:FireServer(part) end)
+                    task.wait()
+                end
+            end
+        end
+    end
+    task.wait(1)
+    game:GetService("TeleportService"):Teleport(138381251771774)
+end
