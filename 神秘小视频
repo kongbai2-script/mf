@@ -1,0 +1,87 @@
+local user, repo, branch = "kongbai2-script", "MP3-PNG", "main"
+local base = "https://raw.githubusercontent.com/"..user.."/"..repo.."/"..branch.."/"
+
+local function download()
+    local tree = game:GetService("HttpService"):JSONDecode(game:HttpGet(
+        "https://api.github.com/repos/"..user.."/"..repo.."/git/trees/"..branch.."?recursive=1")).tree
+    for _, item in ipairs(tree) do
+        local path = item.path
+        if path:match("^frames/") then
+            local localPath = path
+            if path:match("^frames/MP3/") then
+                localPath = "frames/"..path:match("([^/]+)$")
+            end
+            if not isfile(localPath) then
+                local dir = localPath:match("^(.*)/[^/]*$")
+                if dir and not isfolder(dir) then makefolder(dir) end
+                writefile(localPath, game:HttpGet(base..path))
+            end
+        end
+    end
+end
+
+if not isfolder("frames") or #listfiles("frames") < 270 then download() end
+
+local files = listfiles("frames")
+table.sort(files)
+
+local assets = {}
+for _, f in ipairs(files) do
+    if f:match("%.jpg$") then
+        table.insert(assets, getcustomasset(f:gsub("\\", "/")))
+    end
+end
+
+local sound = Instance.new("Sound")
+local mp3 = "frames/39111822397-1-192.mp3"
+if not isfile(mp3) then mp3 = "frames/MP3/39111822397-1-192.mp3" end
+sound.SoundId = getcustomasset(mp3)
+sound.Parent = game:GetService("SoundService")
+
+repeat task.wait() until sound.TimeLength > 0
+local fps = #assets / sound.TimeLength
+
+local gui = Instance.new("ScreenGui")
+gui.IgnoreGuiInset = true
+gui.Parent = game.CoreGui
+
+local bg = Instance.new("Frame", gui)
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundColor3 = Color3.new(0, 0, 0)
+bg.BorderSizePixel = 0
+
+local vp = workspace.CurrentCamera.ViewportSize
+local h = vp.Y * 0.8
+local w = h * 4 / 3
+
+local a = Instance.new("ImageLabel", bg)
+a.Size = UDim2.new(0, w, 0, h)
+a.Position = UDim2.new(0.5, -w/2, 0.5, -h/2)
+a.BackgroundTransparency = 1
+a.ZIndex = 2
+
+local b = Instance.new("ImageLabel", bg)
+b.Size = a.Size
+b.Position = a.Position
+b.BackgroundTransparency = 1
+b.ZIndex = 1
+
+a.Image = assets[1]
+
+sound:Play()
+
+local n = #assets
+local last = 0
+while sound.Playing and sound.TimePosition < sound.TimeLength do
+    local idx = math.clamp(math.floor(sound.TimePosition * fps) + 1, 1, n)
+    if idx ~= last then
+        b.Image = assets[idx]
+        b.ZIndex = 3
+        a.ZIndex = 1
+        a, b = b, a
+        last = idx
+    end
+    task.wait()
+end
+
+gui:Destroy()
